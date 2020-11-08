@@ -37,13 +37,11 @@ const getModuleMasses = function(filepath) {
 
 // Create function that takes in a single integer (module mass) and returns the fuel requirement for that single module mass (findFuelRequirement)
 const findFuelRequirement = function(mass) {
-  mass = parseInt(mass);
   let requirement = Math.floor(mass / 3) - 2;
   return requirement;
 };
 
 // Create function that loops over the array of module masses and performs findFuelRequirement on each mass and sums them all together (getFuelRequirementSum)
-
 const getFuelRequirementSum = function(moduleMassesFilepath) {
   const moduleMasses = getModuleMasses(moduleMassesFilepath);
   let fuelRequirementSum = 0;
@@ -70,14 +68,20 @@ The fuel required by a module of mass 100756 and its fuel is: 33583 + 11192 + 37
 What is the sum of the fuel requirements for all of the modules on your spacecraft when also taking into account the mass of the added fuel? (Calculate the fuel requirements for each module separately, then add them all up at the end.)
 */
 
+// Create function that loops over the array of module masses and performs findFuelRequirement on each mass while it's above 0 and sums them all together (getAdditionalFuelRequirementSum)
 const getAdditionalFuelRequirementSum = function (moduleMassesFilepath) {
   const moduleMasses = getModuleMasses(moduleMassesFilepath);
   let fuelRequirementSum = 0;
+  // For the length of the list of moduleMasses
   for (let i = 0; i < moduleMasses.length; i++) {
     let currentModuleMass = moduleMasses[i];
-    while (findFuelRequirement(currentModuleMass) > 0) {
-      currentModuleMass = findFuelRequirement(currentModuleMass)
-      fuelRequirementSum += currentModuleMass;
+    let fuelRequirement = findFuelRequirement(currentModuleMass)
+    // While the fuel requirement of the current module mass is greater than 0
+    while (fuelRequirement > 0) {
+      // Add that to the sum
+      fuelRequirementSum += fuelRequirement;
+      // Calculate what the next fuel requirement would be for the remaining mass
+      fuelRequirement = findFuelRequirement(fuelRequirement)
     }
   }
   return fuelRequirementSum;
