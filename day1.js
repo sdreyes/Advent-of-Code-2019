@@ -53,7 +53,7 @@ const getFuelRequirementSum = function(moduleMassesFilepath) {
   return fuelRequirementSum;
 }
 
-console.log(getFuelRequirementSum("day1-input.txt"));
+console.log(`Part 1 solution: ${getFuelRequirementSum("day1-input.txt")}`);
 
 // Answer: 3345909
 /* 
@@ -70,4 +70,17 @@ The fuel required by a module of mass 100756 and its fuel is: 33583 + 11192 + 37
 What is the sum of the fuel requirements for all of the modules on your spacecraft when also taking into account the mass of the added fuel? (Calculate the fuel requirements for each module separately, then add them all up at the end.)
 */
 
-// Use recursion and while loop to determine each additional fuels, then add those at the end
+const getAdditionalFuelRequirementSum = function (moduleMassesFilepath) {
+  const moduleMasses = getModuleMasses(moduleMassesFilepath);
+  let fuelRequirementSum = 0;
+  for (let i = 0; i < moduleMasses.length; i++) {
+    let currentModuleMass = moduleMasses[i];
+    while (findFuelRequirement(currentModuleMass) > 0) {
+      currentModuleMass = findFuelRequirement(currentModuleMass)
+      fuelRequirementSum += currentModuleMass;
+    }
+  }
+  return fuelRequirementSum;
+}
+
+console.log(`Part 2 solution: ${getAdditionalFuelRequirementSum("day1-input.txt")}`);
