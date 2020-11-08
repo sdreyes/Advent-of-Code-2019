@@ -52,8 +52,8 @@ const getFuelRequirementSum = function(moduleMassesFilepath) {
 }
 
 console.log(`Part 1 solution: ${getFuelRequirementSum("day1-input.txt")}`);
-
 // Answer: 3345909
+
 /* 
 --- Part Two ---
 During the second Go / No Go poll, the Elf in charge of the Rocket Equation Double-Checker stops the launch sequence. Apparently, you forgot to include additional fuel for the fuel you just added.
@@ -88,3 +88,4 @@ const getAdditionalFuelRequirementSum = function (moduleMassesFilepath) {
 }
 
 console.log(`Part 2 solution: ${getAdditionalFuelRequirementSum("day1-input.txt")}`);
+// Answer: 5015983
