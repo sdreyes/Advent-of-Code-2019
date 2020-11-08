@@ -22,26 +22,40 @@ What is the sum of the fuel requirements for all of the modules on your spacecra
 */
 var fs = require("fs");
 
-fs.readFile("day1-input.txt", "utf8", function(error, data) {
-  if (error) {
-    return console.log(error);
-  }
-  // Map over the data to split on the line breaks and parse into integers
-  const moduleMasses = data.split("\n").map(mass => parseInt(mass));
-  let fuelRequirementSum = 0;
-  // loop through the array of module masses and keep a running total after performing the fuel requirement calculations
-  for (let i = 0; i < moduleMasses.length; i++) {
-    fuelRequirementSum += findFuelRequirement(moduleMasses[i]);
-  }
-  console.log(fuelRequirementSum);
-});
+// Create function that takes in a filepath and returns the contents of that file (readFile)
+const readFile = function(filepath) {
+  if (!fs.existsSync(filepath)) throw ("File not found");
+  const data = fs.readFileSync(filepath, "utf8");
+  return data;
+};
 
+// Create function to parse out the contents of the file into an array of integers (getModuleMasses)
+const getModuleMasses = function(filepath) {
+  // Split the file on linebreaks and parse each value into an integer
+  return readFile(filepath).split("\n").map(mass => parseInt(mass));
+};
+
+// Create function that takes in a single integer (module mass) and returns the fuel requirement for that single module mass (findFuelRequirement)
 const findFuelRequirement = function(mass) {
   mass = parseInt(mass);
   let requirement = Math.floor(mass / 3) - 2;
   return requirement;
 };
 
+// Create function that loops over the array of module masses and performs findFuelRequirement on each mass and sums them all together (getFuelRequirementSum)
+
+const getFuelRequirementSum = function(moduleMassesFilepath) {
+  const moduleMasses = getModuleMasses(moduleMassesFilepath);
+  let fuelRequirementSum = 0;
+  for (let i = 0; i < moduleMasses.length; i++) {
+    fuelRequirementSum += findFuelRequirement(moduleMasses[i]);
+  }
+  return fuelRequirementSum;
+}
+
+console.log(getFuelRequirementSum("day1-input.txt"));
+
+// Answer: 3345909
 /* 
 --- Part Two ---
 During the second Go / No Go poll, the Elf in charge of the Rocket Equation Double-Checker stops the launch sequence. Apparently, you forgot to include additional fuel for the fuel you just added.
@@ -55,3 +69,5 @@ At first, a module of mass 1969 requires 654 fuel. Then, this fuel requires 216 
 The fuel required by a module of mass 100756 and its fuel is: 33583 + 11192 + 3728 + 1240 + 411 + 135 + 43 + 12 + 2 = 50346.
 What is the sum of the fuel requirements for all of the modules on your spacecraft when also taking into account the mass of the added fuel? (Calculate the fuel requirements for each module separately, then add them all up at the end.)
 */
+
+// Use recursion and while loop to determine each additional fuels, then add those at the end
