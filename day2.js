@@ -45,3 +45,55 @@ Here are the initial and final states of a few more small programs:
 1,1,1,4,99,5,6,0,99 becomes 30,1,1,4,2,5,6,0,99.
 Once you have a working computer, the first step is to restore the gravity assist program (your puzzle input) to the "1202 program alarm" state it had just before the last computer caught fire. To do this, before running the program, replace position 1 with the value 12 and replace position 2 with the value 2. What value is left at position 0 after the program halts?
 */
+
+const fs = require("fs");
+const endProgramOpcode = 99;
+
+const readFile = function(filepath) {
+  if (!fs.existsSync(filepath)) throw ("File not found");
+  const data = fs.readFileSync(filepath, "utf8");
+  return data;
+};
+
+const getIntcode = function(filepath) {
+  return readFile(filepath).split(",").map(code => parseInt(code));
+};
+
+const performOpcodeCalculation = function(opcode, pos1, pos2, pos3, intcode) {
+  switch(opcode) {
+    case 1:
+      intcode[pos3] = intcode[pos1] + intcode[pos2]
+      return intcode;
+    case 2:
+      intcode[pos3] = intcode[pos1] * intcode[pos2]
+      return intcode;
+    default:
+      throw "Something went wrong.";
+  }
+};
+
+const restoreGravityAssist = function(intcode) {
+  intcode[1] = 12;
+  intcode[2] = 2;
+  return intcode;
+};
+
+const runIntcode = function(intcodeFilepath) {
+  let intcode = restoreGravityAssist(getIntcode(intcodeFilepath));
+  let opcode = intcode[0];
+  let pos1 = intcode[1];
+  let pos2 = intcode[2];
+  let pos3 = intcode[3];
+  let i = 0
+  while (opcode != endProgramOpcode) {
+    intcode = performOpcodeCalculation(opcode, pos1, pos2, pos3, intcode);
+    i = i + 4;
+    opcode = intcode[i];
+    pos1 = intcode[i+1];
+    pos2 = intcode[i+2];
+    pos3 = intcode[i+3];
+  }
+  return intcode;
+};
+
+console.log(`Part 1 solution: ${runIntcode("day2-input.txt")}`);
