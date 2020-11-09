@@ -40,3 +40,60 @@ R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
 U98,R91,D20,R16,D67,R40,U7,R15,U6,R7 = distance 135
 What is the Manhattan distance from the central port to the closest intersection?
 */
+
+const fs = require("fs");
+
+const readFile = function(filepath) {
+  if (!fs.existsSync(filepath)) throw ("File not found");
+  const data = fs.readFileSync(filepath, "utf8");
+  return data;
+};
+
+const getWirePaths = function(filepath) {
+  const unparsedWirePaths = readFile(filepath).split("\n");
+  const parsedWirePaths = [];
+  for (const path of unparsedWirePaths) {
+    parsedWirePaths.push(path.split(","));
+  }
+  return parsedWirePaths;
+};
+
+const compareWirePaths = function(filepath) {
+  let position = {
+    x: 0,
+    y: 0
+  };
+  const wirePaths = getWirePaths(filepath);
+  let segments = new Array(wirePaths.length).fill([]);
+  let letter;
+  let distance;
+  let nextPosition = {...position};
+  for (let i = 0; i < wirePaths.length; i++) {
+    for (const segment of wirePaths[i]) {
+      letter = segment[0];
+      distance = parseInt(segment.match(/\d+/g));
+      switch(letter) {
+        case "U":
+          nextPosition.y -= distance;
+          break;
+        case "D":
+          nextPosition.y += distance;
+          break;
+        case "L":
+          nextPosition.x -= distance;
+          break;
+        case "R":
+          nextPosition.x += distance;
+          break;
+      }
+      segments[i].push({
+        from: {...position},
+        to: {...nextPosition}
+      })
+      position = {...nextPosition}
+    }
+  }
+  console.log(JSON.stringify(segments, null, 2));
+};
+
+compareWirePaths("day3-input.txt");
