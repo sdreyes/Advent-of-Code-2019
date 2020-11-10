@@ -59,25 +59,28 @@ const getWirePaths = function(filepath) {
 };
 
 const compareWirePaths = function(filepath) {
-  let position = {
-    x: 0,
-    y: 0
-  };
   const wirePaths = getWirePaths(filepath);
-  let segments = new Array(wirePaths.length).fill([]);
+  // Array of two arrays to store coordinates of the start and end of each wire's segments
+  let segments = [[],[]];
   let letter;
   let distance;
-  let nextPosition = {...position};
+  // For the lenth of the list of wirepaths (in this case, 2 wires)
   for (let i = 0; i < wirePaths.length; i++) {
-    for (const segment of wirePaths[i]) {
-      letter = segment[0];
-      distance = parseInt(segment.match(/\d+/g));
+    // Objects to store coordinates of the start and end of each segment
+    let position = {x: 0, y: 0};
+    let nextPosition = {...position};
+    // For each "direction" of the wirepath
+    for (const direction of wirePaths[i]) {
+      // get the direction and the distance it's moving
+      letter = direction[0];
+      distance = parseInt(direction.match(/\d+/g));
+      // Depending on the direction it's moving, add or subtract the distance to find the next coordinates of the wire
       switch(letter) {
         case "U":
-          nextPosition.y -= distance;
+          nextPosition.y += distance;
           break;
         case "D":
-          nextPosition.y += distance;
+          nextPosition.y -= distance;
           break;
         case "L":
           nextPosition.x -= distance;
@@ -85,15 +88,47 @@ const compareWirePaths = function(filepath) {
         case "R":
           nextPosition.x += distance;
           break;
-      }
+        default:
+          throw "Invalid command.";
+      };
+      // Add the start and end coordinates to the array of wire segments
       segments[i].push({
         from: {...position},
         to: {...nextPosition}
-      })
-      position = {...nextPosition}
-    }
-  }
-  console.log(JSON.stringify(segments, null, 2));
+      });
+      // Reset the start position to the current value of nextPosition to prepare for the next iteration
+      position = {...nextPosition};
+    };
+  };
+  let manhattanDistance;
+  let closestManhattanDistance;
+  let wire1 = segments[0];
+  let wire2 = segments[1];
+  wire1.map((segment1) => {
+    wire2.map((segment2) => {
+      // If *only* one of the wires is moving along the horizontal axis, there's a chance they'll intersect
+      // Use XOR to ensure only one condition is true
+      if (segment1.from.x === segment1.to.x ^ segment2.from.x === segment2.to.x) {
+        // If the x axis of wire 1 stays the same, it means the wire 1 segment is moving vertically
+        const vertical = segment1.from.x === segment1.to.x ? segment1 : segment2;
+        // Which in turn means the wire 2 segment is moving horizontally
+        const horizontal = segment1.from.x === segment1.to.x ? segment2 : segment1;
+        // Check the start and end point of each segment and determine which is min/max
+        const minX = Math.min(horizontal.from.x, horizontal.to.x);
+        const maxX = Math.max(horizontal.from.x, horizontal.to.x);
+        const minY = Math.min(vertical.from.y, vertical.to.y);
+        const maxY = Math.max(vertical.from.y, vertical.to.y);
+        // If the x axis from the vertical-moving segment is between the min and max of the horizontal-moving segment
+        // and the y axis from the horizontal-moving segment is between the min and max of the vertical-moving segment
+        if ((vertical.from.x >= minX && vertical.from.x <= maxX) && (horizontal.from.y >= minY && horizontal.from.y <= maxY)) {
+          manhattanDistance = Math.abs(vertical.from.x) + Math.abs(horizontal.from.y);
+          // console.log(`Intersection at ${vertical.from.x} and ${horizontal.from.y}`)
+          closestManhattanDistance = closestManhattanDistance ? Math.min(manhattanDistance, closestManhattanDistance) : manhattanDistance;
+        };
+      };
+    });
+  });
+  return closestManhattanDistance;
 };
 
-compareWirePaths("day3-input.txt");
+console.log(compareWirePaths("day3-input.txt"));
