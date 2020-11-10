@@ -58,6 +58,10 @@ const getWirePaths = function(filepath) {
   return parsedWirePaths;
 };
 
+const manhattan = function(point1, point2) {
+  return Math.abs(point1.x-point2.x) + Math.abs(point1.y-point2.y)
+}
+
 const compareWirePaths = function(filepath) {
   const wirePaths = getWirePaths(filepath);
   // Array of two arrays to store coordinates of the start and end of each wire's segments
@@ -100,11 +104,17 @@ const compareWirePaths = function(filepath) {
       position = {...nextPosition};
     };
   };
-  let manhattanDistance;
+  // console.log(JSON.stringify(segments[0][0], null, 2));
+  let currentManhattanDistance;
   let closestManhattanDistance;
+  let lowestSteps;
+  let currentSteps;
   let wire1 = segments[0];
   let wire2 = segments[1];
+  let stepsTraveled1 = 0;
+  let stepsTraveled2 = 0;
   wire1.map((segment1) => {
+    stepsTraveled2 = 0;
     wire2.map((segment2) => {
       // If *only* one of the wires is moving along the horizontal axis, there's a chance they'll intersect
       // Use XOR to ensure only one condition is true
@@ -121,17 +131,30 @@ const compareWirePaths = function(filepath) {
         // If the x axis from the vertical-moving segment is between the min and max of the horizontal-moving segment
         // and the y axis from the horizontal-moving segment is between the min and max of the vertical-moving segment
         if ((vertical.from.x >= minX && vertical.from.x <= maxX) && (horizontal.from.y >= minY && horizontal.from.y <= maxY)) {
-          manhattanDistance = Math.abs(vertical.from.x) + Math.abs(horizontal.from.y);
-          // console.log(`Intersection at ${vertical.from.x} and ${horizontal.from.y}`)
-          closestManhattanDistance = closestManhattanDistance ? Math.min(manhattanDistance, closestManhattanDistance) : manhattanDistance;
+          let intersection = {
+            x: vertical.from.x,
+            y: horizontal.from.y
+          }
+          currentManhattanDistance = Math.abs(vertical.from.x) + Math.abs(horizontal.from.y);
+          // If a closestManhattanDistance value exists, grab the minimum between that and the manhatta value. Otherwise, the currentManhattanDistance value is the lowest.
+          closestManhattanDistance = closestManhattanDistance ? Math.min(currentManhattanDistance, closestManhattanDistance) : currentManhattanDistance;
+          // Add the two partial segments at the end since it isn't always the full path to the intersection
+          currentSteps = stepsTraveled1 + stepsTraveled2 + manhattan(segment1.from, intersection) + manhattan(segment2.from, intersection);
+          // If a lowestSteps value exists, grab the minimum between that and the currentSteps value. Otherwise, the currentSteps value is the lowest.
+          lowestSteps = lowestSteps ? Math.min(currentSteps, lowestSteps) : currentSteps;
         };
       };
+      stepsTraveled2 += manhattan(segment2.from, segment2.to);
     });
+    stepsTraveled1 += manhattan(segment1.from, segment1.to);
   });
-  return closestManhattanDistance;
+  return {
+    closestManhattanDistance,
+    lowestSteps
+  };
 };
 
-console.log(`Part 1 solution: ${compareWirePaths("day3-input.txt")}`);
+console.log(`Part 1 solution: ${compareWirePaths("day3-input.txt").closestManhattanDistance}`);
 
 /*
 --- Part Two ---
@@ -163,3 +186,5 @@ R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
 U98,R91,D20,R16,D67,R40,U7,R15,U6,R7 = 410 steps
 What is the fewest combined steps the wires must take to reach an intersection?
 */
+
+console.log(`Part 2 solution: ${compareWirePaths("day3-input.txt").lowestSteps}`);
