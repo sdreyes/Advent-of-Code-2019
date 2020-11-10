@@ -55,7 +55,6 @@ let getNumValidPasswords = function(input) {
   let range = input.split("-");
   let minRange = parseInt(range[0]);
   let maxRange = parseInt(range[1]);
-  // console.log(minRange, maxRange);
   for (let i = minRange; i < maxRange; i++) {
     if (isSixDigits(i)) {
       if (hasSameAdjacentDigits(i) && digitsIncrease(i)) numValidPasswords++;
@@ -64,11 +63,49 @@ let getNumValidPasswords = function(input) {
   return numValidPasswords;
 }
 
-console.log(isSixDigits(123456)); //true
-console.log(isSixDigits(2)); //false
-console.log(hasSameAdjacentDigits(11)); //true
-console.log(hasSameAdjacentDigits(123456)); //false
-console.log(digitsIncrease(123456)); //true
-console.log(digitsIncrease(111211)); //false
-console.log(getNumValidPasswords(input));
+console.log(`Part 1 solution: ${getNumValidPasswords(input)}`);
 
+/*
+--- Part Two ---
+An Elf just remembered one more important detail: the two adjacent matching digits are not part of a larger group of matching digits.
+
+Given this additional criterion, but still ignoring the range rule, the following are now true:
+
+112233 meets these criteria because the digits never decrease and all repeated digits are exactly two digits long.
+123444 no longer meets the criteria (the repeated 44 is part of a larger group of 444).
+111122 meets the criteria (even though 1 is repeated more than twice, it still contains a double 22).
+How many different passwords within the range given in your puzzle input meet all of the criteria?
+*/
+
+// Function to check if there is a section with exactly 2 repeating digits
+const hasTwoSameAdjacentDigits = function(num) {
+  let adjacentDigitsCounter = 0;
+  for (let i = 1; i <= 6; i++) {
+    // If the digit is the same as the one before it, increase the counter
+    if (getDigit(num, i) === getDigit(num, i-1)) {
+      adjacentDigitsCounter++;
+    // Otherwise, we've gotten to a different digit, so check if the counter's value is 1. If it is, then we've found exactly two adjacent digits
+    } else if (adjacentDigitsCounter === 1) {
+      return true
+    // Otherwise reset the counter
+    } else {
+      adjacentDigitsCounter = 0;
+    }
+  };
+  return false;
+};
+
+let getUpdatedNumValidPasswords = function(input) {
+  let numValidPasswords = 0;
+  let range = input.split("-");
+  let minRange = parseInt(range[0]);
+  let maxRange = parseInt(range[1]);
+  for (let i = minRange; i <= maxRange; i++) {
+    if (isSixDigits(i)) {
+      if (hasTwoSameAdjacentDigits(i) && digitsIncrease(i)) numValidPasswords++;
+    };
+  };
+  return numValidPasswords;
+}
+
+console.log(`Part 2 solution: ${getUpdatedNumValidPasswords(input)}`);
