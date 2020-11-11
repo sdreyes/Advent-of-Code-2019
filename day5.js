@@ -125,9 +125,9 @@ const runIntcode = function(intcodeFilepath, systemID) {
   return intcode;
 };
 
-console.log(`Part 1 solution:`);
+console.log("Part 1 solution:");
 runIntcode("day5-input.txt", 1);
-console.log(`Part 2 solution:`);
+console.log("Part 2 solution:");
 runIntcode("day5-input.txt", 5);
 
 /*
