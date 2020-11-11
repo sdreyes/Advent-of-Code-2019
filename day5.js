@@ -71,20 +71,17 @@ const parseOpcode = function(opcode) {
 const performOpcodeCalculation = function(intcode, i, systemID) {
   const instruction = intcode[i];
   const opcode = parseOpcode(intcode[i]);
-  let param1;
-  let param2;
-  let param3;
+  let param1 = getDigit(instruction, 2) ? intcode[i+1] : intcode[intcode[i+1]];
+  let param2 = getDigit(instruction, 3) ? intcode[i+2] : intcode[intcode[i+2]];
+  let param3 = getDigit(instruction, 4) ? i+3 : intcode[i+3];
+  // console.log(instruction, opcode);
   switch(opcode) {
+    // Opcode 1 adds together numbers read from two positions and stores the result in a third position. The three integers immediately after the opcode tell you these three positions - the first two indicate the positions from which you should read the input values, and the third indicates the position at which the output should be stored.
     case 1:
-      param1 = getDigit(instruction, 2) ? intcode[i+1]: intcode[intcode[i+1]];
-      param2 = getDigit(instruction, 3) ? intcode[i+2]: intcode[intcode[i+2]];
-      param3 = getDigit(instruction, 4) ? i+3: intcode[i+3]
       intcode[param3] = param1 + param2;
       return i+4;
+    // Opcode 2 works exactly like opcode 1, except it multiplies the two inputs instead of adding them.
     case 2:
-      param1 = getDigit(instruction, 2) ? intcode[i+1]: intcode[intcode[i+1]];
-      param2 = getDigit(instruction, 3) ? intcode[i+2]: intcode[intcode[i+2]];
-      param3 = getDigit(instruction, 4) ? i+3: intcode[i+3];
       intcode[param3] = param1 * param2;
       return i+4;
     // Opcode 3 takes a single integer as input and saves it to the position given by its only parameter. For example, the instruction 3,50 would take an input value and store it at address 50.
@@ -94,9 +91,24 @@ const performOpcodeCalculation = function(intcode, i, systemID) {
     // Opcode 4 outputs the value of its only parameter. For example, the instruction 4,50 would output the value at address 50.
     // Programs that use these instructions will come with documentation that explains what should be connected to the input and output. The program 3,0,4,0,99 outputs whatever it gets as input, then halts.
     case 4:
-      param = getDigit(instruction, 2) ? intcode[i+1]: intcode[intcode[i+1]];
-      console.log(param);
+      console.log(param1);
       return i+2;
+    // Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+    case 5:
+      if (param1 != 0) return param2;
+      return i+3;
+    // Opcode 6 is jump-if-false: if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+    case 6:
+      if (param1 === 0) return param2;
+      return i+3;
+    // Opcode 7 is less than: if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
+    case 7:
+      intcode[param3] = param1 < param2 ? 1 : 0;
+      return i+4;
+    // Opcode 8 is equals: if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
+    case 8:
+      intcode[param3] = param1 === param2 ? 1 : 0;
+      return i+4;
     default:
       throw "Something went wrong.";
   }
@@ -115,6 +127,8 @@ const runIntcode = function(intcodeFilepath, systemID) {
 
 console.log(`Part 1 solution:`);
 runIntcode("day5-input.txt", 1);
+console.log(`Part 2 solution:`);
+runIntcode("day5-input.txt", 5);
 
 /*
 --- Part Two ---
