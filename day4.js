@@ -43,7 +43,7 @@ const hasSameAdjacentDigits = function(num) {
 };
 
 const digitsIncrease = function(num) {
-  for (let i = 5; i > 0; i--) {
+  for (let i = 1; i < 6; i++) {
     // If the digit is smaller than the one preceding it, return false
     if (getDigit(num, i-1) < getDigit(num, i)) return false;
   };
