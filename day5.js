@@ -46,3 +46,64 @@ Finally, the program will output a diagnostic code and immediately halt. This fi
 
 After providing 1 to the only input instruction and passing all the tests, what diagnostic code does the program produce?
 */
+
+const fs = require("fs");
+const endProgramOpcode = 99;
+
+const readFile = function(filepath) {
+  if (!fs.existsSync(filepath)) throw ("File not found");
+  const data = fs.readFileSync(filepath, "utf8");
+  return data;
+};
+
+const getIntcode = function(filepath) {
+  return readFile(filepath).split(",").map(code => parseInt(code));
+};
+
+const performOpcodeCalculation = function(intcode, i) {
+  switch(intcode[i]) {
+    case 1:
+      intcode[intcode[i+3]] = intcode[intcode[i+1]] + intcode[intcode[i+2]];
+      return i+4;
+    case 2:
+      intcode[intcode[i+3]] = intcode[intcode[i+1]] * intcode[intcode[i+2]];
+      return i+4;
+    default:
+      throw "Something went wrong.";
+  }
+};
+
+const restoreGravityAssist = function(intcode, noun, verb) {
+  intcode[1] = noun;
+  intcode[2] = verb;
+  return intcode;
+};
+
+const runIntcode = function(intcodeFilepath, noun, verb) {
+  let intcode = restoreGravityAssist(getIntcode(intcodeFilepath), noun, verb);
+  let opcode = intcode[0];
+  let i = 0
+  while (opcode != endProgramOpcode) {
+    i = performOpcodeCalculation(intcode, i);
+    opcode = intcode[i];
+  }
+  return intcode[0];
+};
+
+// Part 1 solution: 4462686
+// Part 2 solution: 5936
+
+console.log(`Part 1 solution: ${runIntcode("day2-input.txt", 12, 2)}`);
+
+const completeGravityAssist = function(filepath, gravityAssistDesiredOutput) {
+  let output;
+  for (noun = 0; noun <= 99; noun++) {
+    for (verb = 0; verb <= 99; verb++) {
+      output = runIntcode(filepath, noun, verb);
+      if (output === gravityAssistDesiredOutput) return (100 * noun + verb);
+    }
+  }
+  return `${gravityAssistDesiredOutput} is not attainable.`
+}
+
+console.log(`Part 2 solution: ${completeGravityAssist("day2-input.txt", 19690720)}`);
