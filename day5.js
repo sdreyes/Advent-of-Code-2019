@@ -60,50 +60,54 @@ const getIntcode = function(filepath) {
   return readFile(filepath).split(",").map(code => parseInt(code));
 };
 
+const getDigit = function(num, i) {
+  return Math.floor(Math.abs(num) / Math.pow(10, i)) % 10;
+};
+
+const parseOpcode = function(opcode) {
+  return parseInt(`${getDigit(opcode, 1)}${getDigit(opcode, 0)}`)
+};
+
 const performOpcodeCalculation = function(intcode, i) {
-  switch(intcode[i]) {
+  const instruction = intcode[i];
+  const opcode = parseOpcode(intcode[i]);
+  let param1;
+  let param2;
+  let param3;
+  switch(opcode) {
     case 1:
-      intcode[intcode[i+3]] = intcode[intcode[i+1]] + intcode[intcode[i+2]];
+      param1 = getDigit(instruction, 2) ? intcode[i+1]: intcode[intcode[i+1]];
+      param2 = getDigit(instruction, 3) ? intcode[i+2]: intcode[intcode[i+2]];
+      param3 = getDigit(instruction, 4) ? i+3: intcode[i+3]
+      intcode[param3] = param1 + param2;
       return i+4;
     case 2:
-      intcode[intcode[i+3]] = intcode[intcode[i+1]] * intcode[intcode[i+2]];
+      param1 = getDigit(instruction, 2) ? intcode[i+1]: intcode[intcode[i+1]];
+      param2 = getDigit(instruction, 3) ? intcode[i+2]: intcode[intcode[i+2]];
+      param3 = getDigit(instruction, 4) ? i+3: intcode[i+3];
+      intcode[param3] = param1 * param2;
       return i+4;
+    // Opcode 3 takes a single integer as input and saves it to the position given by its only parameter. For example, the instruction 3,50 would take an input value and store it at address 50.
+    case 3:
+      return;
+    // Opcode 4 outputs the value of its only parameter. For example, the instruction 4,50 would output the value at address 50.
+    // Programs that use these instructions will come with documentation that explains what should be connected to the input and output. The program 3,0,4,0,99 outputs whatever it gets as input, then halts.
+    case 4:
+      return;
     default:
       throw "Something went wrong.";
   }
 };
 
-const restoreGravityAssist = function(intcode, noun, verb) {
-  intcode[1] = noun;
-  intcode[2] = verb;
-  return intcode;
-};
-
-const runIntcode = function(intcodeFilepath, noun, verb) {
-  let intcode = restoreGravityAssist(getIntcode(intcodeFilepath), noun, verb);
-  let opcode = intcode[0];
-  let i = 0
+const runIntcode = function(intcodeFilepath) {
+  let intcode = getIntcode(intcodeFilepath);
+  let i = 0;
+  let opcode = intcode[i];
   while (opcode != endProgramOpcode) {
     i = performOpcodeCalculation(intcode, i);
     opcode = intcode[i];
   }
-  return intcode[0];
+  return intcode;
 };
 
-// Part 1 solution: 4462686
-// Part 2 solution: 5936
-
-console.log(`Part 1 solution: ${runIntcode("day2-input.txt", 12, 2)}`);
-
-const completeGravityAssist = function(filepath, gravityAssistDesiredOutput) {
-  let output;
-  for (noun = 0; noun <= 99; noun++) {
-    for (verb = 0; verb <= 99; verb++) {
-      output = runIntcode(filepath, noun, verb);
-      if (output === gravityAssistDesiredOutput) return (100 * noun + verb);
-    }
-  }
-  return `${gravityAssistDesiredOutput} is not attainable.`
-}
-
-console.log(`Part 2 solution: ${completeGravityAssist("day2-input.txt", 19690720)}`);
+console.log(`Part 1 solution: ${runIntcode("day5-input.txt")}`);
