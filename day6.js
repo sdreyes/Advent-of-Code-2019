@@ -50,3 +50,41 @@ The total number of direct and indirect orbits in this example is 42.
 
 What is the total number of direct and indirect orbits in your map data?
 */
+
+const fs = require("fs");
+
+const readFile = filepath => {
+  if (!fs.existsSync(filepath)) throw ("File not found");
+  const data = fs.readFileSync(filepath, "utf8");
+  return data;
+};
+
+const getOrbitData = (filepath) => {
+  return parseOrbitData(readFile(filepath).split("\n"));
+};
+
+const parseOrbitData = (orbitData) => {
+  let obj = {};
+  for (let i = 0; i < orbitData.length; i++) {
+    const orbitee = orbitData[i].split(")")[0];
+    const orbiter = orbitData[i].split(")")[1];
+    obj[orbiter] = orbitee;
+  }
+  return obj;
+};
+
+const countOrbits = (i, orbitData) => {
+  if (orbitData[i]) return 1 + countOrbits(orbitData[i], orbitData)
+  return 0;
+};
+
+const checkSum = filepath => {
+  let orbitData = getOrbitData("day6-input.txt");
+  let count = 0;
+  for (const i in orbitData) {
+    count += countOrbits(i, orbitData);
+  }
+  return count;
+};
+
+console.log(checkSum("day6-input.txt"));
